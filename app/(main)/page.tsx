@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -79,6 +79,22 @@ export default function HomePage() {
     fetchCategories();
     fetchProducts(undefined, 1);
   }, [fetchCategories, fetchProducts]);
+
+  /** Infinite scroll - load more when reaching bottom */
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastProductRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loadingMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchProducts(selectedCategorySlug, page + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loadingMore, hasMore, fetchProducts, selectedCategorySlug, page]
+  );
 
   return (
     <main className="min-h-[calc(100vh-4rem)] text-center">
@@ -166,23 +182,38 @@ export default function HomePage() {
           <p className="text-muted-foreground">No products found</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto">
-            {products.map((product: any) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                title={product.name}
-                price={product.price}
-                image={product.image}
-                averageRating={product.averageRating}
-                category={product.categorySlug}
-                description={product.description}
-                discountPrice={product.discountPrice} // if available
-              />
+            {products.map((product: any, index: number) => {
+              const isLast = index === products.length - 1;
+              return (
+                <div
+                  key={product.id}
+                  ref={isLast ? lastProductRef : null} // observe the last item
+                >
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    title={product.name}
+                    price={product.price}
+                    image={product.image}
+                    averageRating={product.averageRating}
+                    category={product.categorySlug}
+                    description={product.description}
+                    discountPrice={product.discountPrice} // if available
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {loadingMore && (
+          <div className="flex justify-center mt-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-48 w-full rounded-xl mx-2" />
             ))}
           </div>
         )}
         {/* Load more button */}
-        {!loading && products.length > 0 && (
+        {/* {!loading && products.length > 0 && (
           <div className="mt-8 flex justify-center">
             {hasMore ? (
               <Button
@@ -199,7 +230,7 @@ export default function HomePage() {
               )
             )}
           </div>
-        )}
+        )} */}
       </section>
       {/* CTA Section */}
       <section className="py-16 bg-primary/5">
