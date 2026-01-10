@@ -147,7 +147,7 @@ export default function HomePage() {
         <CategoryList
           categories={categories}
           onCategorySelect={(slug) => fetchProducts(slug)}
-          onBack={() => fetchProducts()}
+          // onBack={() => fetchProducts()}
         />
       </section>
       {/* Featured Products */}

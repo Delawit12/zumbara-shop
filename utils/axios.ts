@@ -5,7 +5,8 @@ import axios, {
 } from "axios";
 import { clearAllCookies, getFromCookies } from "./store";
 
-export const API_BASE_URL = "https://backend.zumbarashop.com/api/v1";
+// export const API_BASE_URL = "https://backend.zumbarashop.com/api/v1";
+export const API_BASE_URL = "https://nest-zumbara.onrender.com/api/v1";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

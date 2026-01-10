@@ -234,10 +234,10 @@ export default function ProductDetail() {
             {/* Product Info Section */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                <h1 className="text-3xl lg:text-4xl font-bold text-foreground leading-tight">
                   {product.name}
                 </h1>
-                <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
+                <p className="text-base text-muted-foreground leading-relaxed max-w-lg">
                   {product.description}
                 </p>
               </div>
@@ -257,10 +257,10 @@ export default function ProductDetail() {
 
               {/* Price Section */}
               <div className="space-y-3 pb-8 border-b border-border">
-                <p className="text-6xl font-bold text-foreground">
+                <p className="text-2xl font-bold text-foreground">
                   {formatETB(currentPrice)}
                 </p>
-                <p className="text-base text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-primary">
                     {selectedVariant?.stock || product.stock}
                   </span>{" "}
