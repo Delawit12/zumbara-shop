@@ -200,11 +200,9 @@ export function CategoryList({
 
   return (
     <div className="mt-4 space-y-4">
-      {/* <div className="max-w-6xl mx-auto px-2">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Categories
-        </h1>
-      </div> */}
+      <h1 className="text-2xl font-bold text-left mb-6 text-gray-900 dark:text-white">
+        Categories
+      </h1>
 
       {/* Main Categories */}
       <div className="flex gap-4 overflow-x-auto pb-2">
