@@ -6,11 +6,14 @@ import {
   Star as StarOutline,
   ShoppingCart,
   ShoppingBag,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { addToCart } from "@/utils/api/cart";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useIsAuthenticated } from "@/stores/user-store";
 
 export type ProductCardProps = {
   id: string;
@@ -50,6 +53,9 @@ export const ProductCard = ({
   const hasHalfStar = averageRating - fullStars >= 0.5;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
+  const router = useRouter();
+  const isAuthenticated = useIsAuthenticated();
+
   const handleAddToCart = async () => {
     try {
       await addToCart({ productId: id, quantity: 1 });
@@ -59,6 +65,17 @@ export const ProductCard = ({
         error instanceof Error ? error.message : "Failed to add to cart"
       );
     }
+  };
+
+  const handleBuyNow = () => {
+    if (!isAuthenticated) {
+      const query = new URLSearchParams({ productId: id });
+      router.push(`/auth/login?redirect=/checkout?${query.toString()}`);
+      return;
+    }
+
+    const queryParams = new URLSearchParams({ productId: id });
+    router.push(`/checkout?${queryParams.toString()}`);
   };
 
   return (
@@ -71,6 +88,19 @@ export const ProductCard = ({
             alt={title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+
+          <button
+            onClick={(e) => {
+              e.preventDefault(); // prevent navigating to product page when clicking icon
+              handleAddToCart();
+            }}
+            className="absolute bottom-2 right-2 flex items-center justify-center w-10 h-10 rounded-full 
+                 text-primary-foreground opacity-90 hover:opacity-100 
+                 hover:scale-110 transition-transform duration-200 shadow-md"
+            title="Add to Cart"
+          >
+            <ShoppingCart className="w-7 h-7 text-primary/100" />
+          </button>
         </div>
         {/* CONTENT */}
         <div className="p-4 flex flex-col flex-1 text-left justify-start">
@@ -132,14 +162,23 @@ export const ProductCard = ({
         </div>
       </Link>
       {/* BUTTON */}
-      <div className="p-4 pt-0">
-        <Button
+      <div className="p-4 pt-0 flex flex-col gap-2">
+        {/* <Button
           onClick={handleAddToCart}
           variant="default"
           className="w-full flex items-center justify-center gap-2 cursor-pointer"
         >
           <ShoppingBag className="w-4 h-4" />
           Add to Cart
+        </Button> */}
+
+        <Button
+          onClick={handleBuyNow}
+          variant="secondary" // define secondary style in your button component
+          className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          <Package className="w-4 h-4" />
+          Buy Now
         </Button>
       </div>
     </div>
