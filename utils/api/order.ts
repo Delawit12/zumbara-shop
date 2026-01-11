@@ -228,3 +228,22 @@ export const customerApproveDelivery = async (data: {
     throw new Error(message);
   }
 };
+
+// ✅ CANCEL ORDER (Customer)
+export const cancelOrder = async (data: {
+  orderId: string;
+  reason?: string;
+}) => {
+  try {
+    const response = await axiosInstance.patch(`/orders/cancel`, data);
+
+    return response.data;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.details?.message ||
+      error?.response?.data?.message ||
+      error?.message ||
+      "Failed to cancel order";
+    throw new Error(message);
+  }
+};

@@ -14,7 +14,11 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { getSingleOrder, uploadPaymentProofToBackend } from "@/utils/api/order";
+import {
+  cancelOrder,
+  getSingleOrder,
+  uploadPaymentProofToBackend,
+} from "@/utils/api/order";
 import { getPaymentMethods } from "@/utils/api/payments";
 import { formatETB } from "@/utils/formatter";
 import { Input } from "@/components/ui/input";
@@ -53,6 +57,10 @@ export default function OrderDetailPage() {
   const [paymentMethods, setPaymentMethods] = useState<any[] | null>(null);
   const [methodsLoading, setMethodsLoading] = useState(false);
 
+  const [cancelReason, setCancelReason] = useState("");
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+
   const loadOrder = async () => {
     setLoading(true);
     const data = (await getSingleOrder(id as string)) as Order;
@@ -84,6 +92,19 @@ export default function OrderDetailPage() {
 
     loadMethods();
   }, [order]);
+
+  const handleCancelOrder = async () => {
+    try {
+      setCancelling(true);
+      await cancelOrder({ orderId: id as string, reason: cancelReason });
+      await loadOrder(); // refresh status
+      setShowCancelModal(false);
+    } catch (err: any) {
+      alert(err.message || "Failed to cancel order");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const handleUploadProof = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!order) return;
@@ -174,6 +195,47 @@ export default function OrderDetailPage() {
         Total: {formatETB(order.totalAmount)}
       </div>
 
+      {order.status === "PENDING" && (
+        <Button variant="destructive" onClick={() => setShowCancelModal(true)}>
+          Cancel Order
+        </Button>
+      )}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl w-full max-w-md space-y-4">
+            <h2 className="text-lg font-semibold">Cancel Order</h2>
+
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to cancel this order?
+            </p>
+
+            <textarea
+              className="w-full border rounded p-2 text-sm"
+              placeholder="Reason for cancellation"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+            />
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelModal(false)}
+              >
+                Keep Order
+              </Button>
+
+              <Button
+                variant="destructive"
+                disabled={!cancelReason || cancelling}
+                onClick={handleCancelOrder}
+              >
+                {cancelling ? "Cancelling..." : "Confirm Cancel"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PAYMENT PROOFS DISPLAY */}
       {/* {order.paymentProofs && order.paymentProofs.length > 0 && (
         <div>
@@ -226,7 +288,7 @@ export default function OrderDetailPage() {
       )} */}
 
       {/* UPLOAD PAYMENT PROOF */}
-      {order.paymentStatus === "PENDING" && (
+      {order.paymentStatus === "PENDING" && order.status === "PENDING" && (
         // <div>
         //   <p className="text-sm mb-2 font-medium">Upload Payment Proof</p>
         //   <Input type="file" onChange={handleUploadProof} />
@@ -247,6 +309,12 @@ export default function OrderDetailPage() {
             Please prepare the exact amount. Our delivery agent will contact you
             before arrival.
           </p>
+        </div>
+      )}
+
+      {order.status === "CANCELLED" && (
+        <div className="p-4 bg-red-200 text-red-600 rounded-md text-sm">
+          This order was cancelled.
         </div>
       )}
 
