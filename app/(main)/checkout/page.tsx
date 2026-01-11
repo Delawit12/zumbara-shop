@@ -10,6 +10,7 @@ import { getProductById } from "@/utils/api/products";
 import { createOrder } from "@/utils/api/order";
 import { formatETB } from "@/utils/formatter";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 
 // THIS IS THE ONLY CORRECT WAY — NO FUNCTION, NO REVALIDATE FUNCTION
 export const dynamic = "force-dynamic";
@@ -34,6 +35,8 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(true);
   const [checkoutItem, setCheckoutItem] = useState<any>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
 
   const placeOrder = async () => {
     try {
@@ -49,17 +52,22 @@ function CheckoutContent() {
       }
 
       setPlacingOrder(true);
+      let result;
+
       if (cartId) {
-        const result = await createOrder({ cartId });
-        router.push(`/orders/${result.id}`);
+        result = await createOrder({ cartId });
+        // router.push(`/orders/${result.id}`);
       } else {
-        const result = await createOrder({
+        result = await createOrder({
           productId: checkoutItem.product.id,
           variantId: checkoutItem.variant?.id,
           quantity: checkoutItem.quantity,
         });
-        router.push(`/orders/${result.id}`);
+        // router.push(`/orders/${result.id}`);
       }
+
+      setCreatedOrderId(result.id);
+      setOrderSuccess(true);
     } catch (err: any) {
       alert(err.message || "Order failed");
     } finally {
@@ -236,6 +244,35 @@ function CheckoutContent() {
       >
         {placingOrder ? "Placing Order..." : "Place Order"}
       </Button>
+
+      {orderSuccess && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 max-w-md w-full text-center space-y-4 shadow-lg">
+            <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
+
+            <h2 className="text-xl font-semibold">Order Placed Successfully</h2>
+
+            <p className="text-sm text-muted-foreground">
+              Your order has been placed Successfully. Our delivery team will
+              contact you shortly to confirm and deliver your items.
+            </p>
+
+            <div className="flex flex-col gap-3 mt-4">
+              <Button className="w-full" onClick={() => router.push("/shop")}>
+                Continue Shopping
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => router.push("/orders")}
+              >
+                My Orders
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

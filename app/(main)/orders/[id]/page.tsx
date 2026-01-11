@@ -175,7 +175,7 @@ export default function OrderDetailPage() {
       </div>
 
       {/* PAYMENT PROOFS DISPLAY */}
-      {order.paymentProofs && order.paymentProofs.length > 0 && (
+      {/* {order.paymentProofs && order.paymentProofs.length > 0 && (
         <div>
           <p className="text-sm font-semibold mb-2">Uploaded Payment Proofs</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -196,15 +196,19 @@ export default function OrderDetailPage() {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* PAYMENT METHODS (show when order not paid) */}
-      {order.paymentStatus === "PENDING" && (
+      {/* {order.paymentStatus === "PENDING" && (
         <div>
           <p className="text-sm mb-2 font-medium">Payment Methods</p>
-          {methodsLoading && <p className="text-sm text-gray-600">Loading methods...</p>}
+          {methodsLoading && (
+            <p className="text-sm text-gray-600">Loading methods...</p>
+          )}
           {!methodsLoading && paymentMethods && paymentMethods.length === 0 && (
-            <p className="text-sm text-gray-600">No payment methods available.</p>
+            <p className="text-sm text-gray-600">
+              No payment methods available.
+            </p>
           )}
 
           {!methodsLoading && paymentMethods && paymentMethods.length > 0 && (
@@ -219,18 +223,30 @@ export default function OrderDetailPage() {
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       {/* UPLOAD PAYMENT PROOF */}
       {order.paymentStatus === "PENDING" && (
-        <div>
-          <p className="text-sm mb-2 font-medium">Upload Payment Proof</p>
-          <Input type="file" onChange={handleUploadProof} />
-          {uploading && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-              <Loader className="animate-spin" size={16} /> Uploading...
-            </div>
-          )}
+        // <div>
+        //   <p className="text-sm mb-2 font-medium">Upload Payment Proof</p>
+        //   <Input type="file" onChange={handleUploadProof} />
+        //   {uploading && (
+        //     <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+        //       <Loader className="animate-spin" size={16} /> Uploading...
+        //     </div>
+        //   )}
+        // </div>
+
+        <div className="p-4 border rounded-lg">
+          <p className="text-sm font-medium">
+            Payment Method:
+            <span className="ml-2 font-semibold">Cash on Delivery</span>
+          </p>
+
+          <p className="text-sm text-muted-foreground mt-1">
+            Please prepare the exact amount. Our delivery agent will contact you
+            before arrival.
+          </p>
         </div>
       )}
 
