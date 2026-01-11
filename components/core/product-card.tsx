@@ -36,6 +36,7 @@ export const ProductCard = ({
   description,
   discountPrice,
 }: ProductCardProps) => {
+  console.log(title);
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "ETB",
@@ -88,26 +89,28 @@ export const ProductCard = ({
             alt={title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-
-          <button
-            onClick={(e) => {
-              e.preventDefault(); // prevent navigating to product page when clicking icon
-              handleAddToCart();
-            }}
-            className="absolute bottom-2 right-2 flex items-center justify-center w-10 h-10 rounded-full 
-                 text-primary-foreground opacity-90 hover:opacity-100 
-                 hover:scale-110 transition-transform duration-200 shadow-md"
-            title="Add to Cart"
-          >
-            <ShoppingCart className="w-7 h-7 text-primary/100" />
-          </button>
         </div>
         {/* CONTENT */}
         <div className="p-4 flex flex-col flex-1 text-left justify-start">
-          {/* TITLE */}
-          <h2 className="text-base font-semibold text-zinc-800 dark:text-zinc-100 truncate text-left">
-            {title}
-          </h2>
+          <div className="flex justify-between">
+            {/* TITLE */}
+            <h2 className="text-base font-semibold text-zinc-800 dark:text-zinc-100 truncate text-left">
+              {title}
+            </h2>
+
+            {/* Cart Icon */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleAddToCart();
+              }}
+              className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-100
+                 transition-transform duration-200 hover:scale-110"
+              title="Add to cart"
+            >
+              <ShoppingCart className="w-7 h-7 text-primary/100" />
+            </button>
+          </div>
 
           {/* CATEGORY */}
           {category && (
@@ -117,7 +120,7 @@ export const ProductCard = ({
           )}
 
           {/* PRICE */}
-          <div className="flex items-center gap-2 mt-1 text-left">
+          <div className="flex items-center gap-2 justify-between mt-1 text-left">
             <p
               className={`text-sm font-bold ${
                 discountPrice
