@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { getUserProfile } from "@/utils/api/user";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const isValidEthiopianPhone = (phoneNumber: string) => {
     const cleanPhone = phoneNumber.replace(/\D/g, "");
@@ -99,7 +101,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-semibold text-foreground mb-3">
               Password
             </label>
@@ -110,6 +112,35 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="h-12 rounded-lg border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
             />
+          </div> */}
+
+          <div>
+            <label className="block text-sm font-semibold text-foreground mb-3">
+              Password
+            </label>
+
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-12 pr-12 rounded-lg border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           <Button
