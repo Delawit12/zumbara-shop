@@ -17,7 +17,7 @@ import { useIsAuthenticated } from "@/stores/user-store";
 
 export type ProductCardProps = {
   id: string;
-  title: string;
+  name: string;
   price: number;
   image?: string;
   averageRating?: number;
@@ -28,7 +28,7 @@ export type ProductCardProps = {
 
 export const ProductCard = ({
   id,
-  title,
+  name,
   price,
   image,
   averageRating = 0,
@@ -36,7 +36,7 @@ export const ProductCard = ({
   description,
   discountPrice,
 }: ProductCardProps) => {
-  console.log(title);
+  console.log(name);
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "ETB",
@@ -86,7 +86,7 @@ export const ProductCard = ({
         <div className="relative w-full h-44 overflow-hidden group">
           <img
             src={image || "https://via.placeholder.com/150"}
-            alt={title}
+            alt={name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
@@ -95,7 +95,7 @@ export const ProductCard = ({
           <div className="flex justify-between">
             {/* TITLE */}
             <h2 className="text-base font-semibold text-zinc-800 dark:text-zinc-100 truncate text-left">
-              {title}
+              {name}
             </h2>
 
             {/* Cart Icon */}
