@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ProductCard, type ProductCardProps } from "./product-card";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +19,31 @@ export const ProductsGrid = ({
   onLoadMore,
   hasMore = false,
 }: ProductsGridProps) => {
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasMore || isLoadingMore || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting) {
+          onLoadMore();
+        }
+      },
+      {
+        rootMargin: "200px", // preload earlier (smooth UX)
+      }
+    );
+
+    const current = observerRef.current;
+    if (current) observer.observe(current);
+
+    return () => {
+      if (current) observer.unobserve(current);
+    };
+  }, [hasMore, isLoadingMore, onLoadMore]);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -52,6 +78,19 @@ export const ProductsGrid = ({
       </div>
 
       {hasMore && (
+        <div
+          ref={observerRef}
+          className="h-10 flex items-center justify-center"
+        >
+          {isLoadingMore && (
+            <span className="text-sm text-muted-foreground">
+              Loading more products…
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* {hasMore && (
         <div className="flex justify-center pt-4">
           <Button
             onClick={onLoadMore}
@@ -61,7 +100,7 @@ export const ProductsGrid = ({
             {isLoadingMore ? "Loading..." : "Load More"}
           </Button>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
