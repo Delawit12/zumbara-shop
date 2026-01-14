@@ -17,6 +17,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -54,6 +55,7 @@ import {
   Calendar,
   MapPin,
   Clock,
+  XCircle,
 } from "lucide-react";
 import {
   getSingleOrder,
@@ -124,6 +126,7 @@ interface Order {
   totalAmount: number;
   paymentStatus: keyof typeof PaymentStatus;
   status: keyof typeof OrderStatus;
+  reasonForCancellation: string | null;
   deliveryId: string | null;
   deliveryCompletedAt: string | null;
   createdAt: string;
@@ -629,6 +632,35 @@ export default function OrderDetailPage() {
                   Cancel Order
                 </Button>
               )}
+
+              {order.status === "CANCELLED" && (
+                <Card className="border-destructive/40 bg-destructive/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-destructive">
+                      <XCircle className="h-5 w-5" />
+                      Order Cancelled
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="space-y-2">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Cancellation Reason
+                      </p>
+                      <p className="font-medium">
+                        {order.reasonForCancellation || "No reason provided"}
+                      </p>
+                    </div>
+                    {/* 
+                    {order.cancelledAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Cancelled on{" "}
+                        {new Date(order.cancelledAt).toLocaleString()}
+                      </p>
+                    )} */}
+                  </CardContent>
+                </Card>
+              )}
             </CardContent>
           </Card>
 
@@ -708,86 +740,88 @@ export default function OrderDetailPage() {
           </Card>
 
           {/* Delivery Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Truck className="h-5 w-5" />
-                Delivery Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {order.delivery ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    {order.delivery.image ? (
-                      <img
-                        src={order.delivery.image}
-                        alt={`${order.delivery.firstName} ${order.delivery.lastName}`}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                        <User className="h-5 w-5 text-gray-500" />
+          {order.status !== "CANCELLED" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="h-5 w-5" />
+                  Delivery Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {order.delivery ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      {order.delivery.image ? (
+                        <img
+                          src={order.delivery.image}
+                          alt={`${order.delivery.firstName} ${order.delivery.lastName}`}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <User className="h-5 w-5 text-gray-500" />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium">
+                          {order.delivery.firstName} {order.delivery.lastName}
+                        </p>
+                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {order.delivery.phone}
+                        </p>
                       </div>
-                    )}
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {order.delivery.firstName} {order.delivery.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {order.delivery.phone}
-                      </p>
+                      {/* Reassign button */}
+                      {canReassign && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setAssignDialogOpen(true)}
+                        >
+                          Reassign
+                        </Button>
+                      )}
                     </div>
-                    {/* Reassign button */}
-                    {canReassign && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setAssignDialogOpen(true)}
-                      >
-                        Reassign
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge
-                      variant="outline"
-                      className="bg-green-50 text-green-700"
-                    >
-                      <Truck className="h-3 w-3 mr-1" />
-                      Assigned
-                    </Badge>
-                    {order.status === "DELIVERING" && (
+                    <div className="flex gap-2">
                       <Badge
                         variant="outline"
-                        className="bg-blue-50 text-blue-700"
+                        className="bg-green-50 text-green-700"
                       >
-                        In Progress
+                        <Truck className="h-3 w-3 mr-1" />
+                        Assigned
                       </Badge>
-                    )}
+                      {order.status === "DELIVERING" && (
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700"
+                        >
+                          In Progress
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <X className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                  <p className="font-medium text-yellow-600">
-                    No Delivery Assigned
-                  </p>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Assign a delivery person to proceed
-                  </p>
-                  <Button
-                    onClick={() => setAssignDialogOpen(true)}
-                    className="w-full"
-                  >
-                    <Truck className="h-4 w-4 mr-2" />
-                    Assign Delivery
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                ) : (
+                  <div className="text-center py-4">
+                    <X className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                    <p className="font-medium text-yellow-600">
+                      No Delivery Assigned
+                    </p>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Assign a delivery person to proceed
+                    </p>
+                    <Button
+                      onClick={() => setAssignDialogOpen(true)}
+                      className="w-full"
+                    >
+                      <Truck className="h-4 w-4 mr-2" />
+                      Assign Delivery
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
