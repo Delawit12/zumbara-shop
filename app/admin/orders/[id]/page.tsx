@@ -63,6 +63,7 @@ import {
   PaymentStatus,
 } from "@/utils/api/order";
 import { getAllUsers, Role } from "@/utils/api/user";
+import { toast } from "sonner";
 
 interface OrderItem {
   id: string;
@@ -165,6 +166,13 @@ export default function OrderDetailPage() {
   // Check if we should show payment tab by default
   const showPaymentTab = searchParams.get("tab") === "payment";
 
+  const CAN_REASSIGN_STATUSES = ["PENDING", "DELIVERING"];
+  const CAN_CANCEL_STATUSES = ["PENDING"];
+
+  const canReassign =
+    order?.delivery && CAN_REASSIGN_STATUSES.includes(order.status);
+  const canCancelOrder = order && CAN_CANCEL_STATUSES.includes(order.status);
+
   const fetchOrder = async () => {
     setIsLoading(true);
     try {
@@ -214,8 +222,9 @@ export default function OrderDetailPage() {
       await fetchOrder(); // Refresh order data
       setAssignDialogOpen(false);
       setSelectedDeliveryUser("");
-    } catch (error) {
-      console.error("Error assigning delivery:", error);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to assign delivery");
+      // console.error("Error assigning delivery:", error);
     } finally {
       setIsAssigningDelivery(false);
     }
@@ -626,7 +635,7 @@ export default function OrderDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {order.delivery ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     {order.delivery.image ? (
                       <img
@@ -639,7 +648,7 @@ export default function OrderDetailPage() {
                         <User className="h-5 w-5 text-gray-500" />
                       </div>
                     )}
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">
                         {order.delivery.firstName} {order.delivery.lastName}
                       </p>
@@ -648,6 +657,16 @@ export default function OrderDetailPage() {
                         {order.delivery.phone}
                       </p>
                     </div>
+                    {/* Reassign button */}
+                    {canReassign && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setAssignDialogOpen(true)}
+                      >
+                        Reassign
+                      </Button>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Badge
