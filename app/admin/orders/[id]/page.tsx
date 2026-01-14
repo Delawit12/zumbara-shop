@@ -61,9 +61,11 @@ import {
   adminReviewPaymentProof,
   OrderStatus,
   PaymentStatus,
+  cancelOrder,
 } from "@/utils/api/order";
 import { getAllUsers, Role } from "@/utils/api/user";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface OrderItem {
   id: string;
@@ -162,6 +164,9 @@ export default function OrderDetailPage() {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Check if we should show payment tab by default
   const showPaymentTab = searchParams.get("tab") === "payment";
@@ -335,6 +340,31 @@ export default function OrderDetailPage() {
       order?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) ||
       0
     );
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancelReason.trim()) {
+      toast.warning("Please provide a cancellation reason");
+      return;
+    }
+
+    setIsCancelling(true);
+    try {
+      await cancelOrder({
+        orderId,
+        reason: cancelReason,
+      });
+
+      toast.success("Order cancelled successfully");
+      await fetchOrder();
+
+      setCancelDialogOpen(false);
+      setCancelReason("");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to cancel order");
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   if (isLoading) {
@@ -588,8 +618,60 @@ export default function OrderDetailPage() {
                   </div>
                 )}
               </div>
+              <Separator />
+              {canCancelOrder && (
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => setCancelDialogOpen(true)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel Order
+                </Button>
+              )}
             </CardContent>
           </Card>
+
+          <AlertDialog
+            open={cancelDialogOpen}
+            onOpenChange={setCancelDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. Please provide a reason for
+                  cancelling this order.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="Reason for cancellation..."
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                />
+              </div>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => {
+                    setCancelDialogOpen(false);
+                    setCancelReason("");
+                  }}
+                >
+                  Back
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleCancelOrder}
+                  disabled={isCancelling}
+                  className="bg-destructive text-destructive-foreground"
+                >
+                  {isCancelling ? "Cancelling..." : "Confirm Cancel"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Customer Information */}
           <Card>
